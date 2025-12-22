@@ -101,7 +101,6 @@
                            value="{{ old('JAM_KELUAR', $JAM_KELUAR_HI ?? null) }}"
                            class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
                     @error('JAM_KELUAR') <p class="mt-2 text-sm text-rose-700">{{ $message }}</p> @enderror
-                    <p class="mt-1 text-xs text-slate-500">Jika JAM_KELUAR diisi, status dianggap "Selesai".</p>
                 </div>
 
                 <div class="sm:col-span-2">

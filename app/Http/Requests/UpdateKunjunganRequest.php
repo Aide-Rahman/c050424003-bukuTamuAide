@@ -50,16 +50,4 @@ class UpdateKunjunganRequest extends FormRequest
             ],
         ];
     }
-
-    public function withValidator($validator): void
-    {
-        $validator->after(function ($validator) {
-            $status = $this->input('STATUS_KUNJUNGAN');
-            $jamKeluar = $this->input('JAM_KELUAR');
-
-            if ($status === 'Selesai' && empty($jamKeluar)) {
-                $validator->errors()->add('JAM_KELUAR', 'Jika status "Selesai", JAM_KELUAR wajib diisi.');
-            }
-        });
-    }
 }

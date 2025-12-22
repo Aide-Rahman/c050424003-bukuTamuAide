@@ -193,7 +193,7 @@ class KunjunganController extends Controller
         $updated = DB::transaction(function () use ($kunjungan, $validated) {
             $jamMasuk = self::hiToTime($validated['JAM_MASUK'] ?? null);
             $jamKeluar = self::hiToTime($validated['JAM_KELUAR'] ?? null);
-            $status = $jamKeluar ? 'Selesai' : $validated['STATUS_KUNJUNGAN'];
+            $status = $validated['STATUS_KUNJUNGAN'];
 
             $kunjungan->update([
                 'ID_TAMU' => $validated['ID_TAMU'],
