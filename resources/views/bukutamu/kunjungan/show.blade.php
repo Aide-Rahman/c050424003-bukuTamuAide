@@ -4,198 +4,506 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Detail Kunjungan #{{ $kunjungan->ID_KUNJUNGAN }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --bg-void: #050505;
+            --bg-card: rgba(10, 10, 10, 0.7);
+            --bg-input: #0a0a0a;
+
+            --border-dim: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(255, 255, 255, 0.2);
+
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-tertiary: #52525b;
+
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+
+            --ease-apple: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: var(--bg-void);
+            color: var(--text-primary);
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            font-size: 14px;
+        }
+        a { text-decoration: none; color: inherit; transition: all 0.2s ease; }
+        * { box-sizing: border-box; outline: none; }
+
+        .bg-fixed-layer { position: fixed; inset: 0; pointer-events: none; }
+        .bg-liquid {
+            z-index: -3;
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(at 0% 0%, hsla(0,0%,15%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(0,0%,5%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(0,0%,15%,1) 0, transparent 50%);
+            background-size: 200% 200%;
+            animation: liquidFlow 15s ease infinite alternate;
+            opacity: 0.6;
+        }
+        @keyframes liquidFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .bg-smoke {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw; height: 150vh;
+            z-index: -2;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+            filter: blur(80px);
+            animation: breathe 10s infinite ease-in-out;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+        .bg-grid {
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            opacity: 0.4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 100px 24px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 0 16px 80px 16px; }
+            .nav-inner { padding: 0 16px; }
+        }
+
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10, 10, 10, 0.35);
+            backdrop-filter: blur(34px) saturate(160%);
+            -webkit-backdrop-filter: blur(34px) saturate(160%);
+            border-bottom: 1px solid var(--border-dim);
+            height: 72px;
+            display: flex; align-items: center;
+            margin-bottom: 32px;
+            isolation: isolate;
+        }
+        .navbar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255,255,255,0.06), transparent 45%),
+                radial-gradient(circle at 80% 0%, rgba(255,255,255,0.04), transparent 50%);
+            opacity: 0.9;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .navbar::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 1px;
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0.16),
+                rgba(255,255,255,0)
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+        .nav-inner {
+            display: flex; justify-content: space-between; align-items: center; width: 100%;
+            padding: 0 24px; max-width: 1200px; margin: 0 auto;
+        }
+        .logo-group { display: flex; align-items: center; gap: 14px; }
+        .logo-box {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, #1f1f22, #070708);
+            border: 1px solid var(--border-dim);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: grid; place-items: center;
+        }
+        .nav-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; line-height: 1.1; }
+        .nav-subtitle { font-size: 0.75rem; color: var(--text-tertiary); font-weight: 500; line-height: 1.1; margin-top: 2px; }
+        .nav-menu { display: flex; align-items: center; gap: 14px; }
+        .nav-link {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+        }
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 8px 14px;
+            border-radius: 10px;
+            transition: transform 0.2s var(--ease-apple), opacity 0.2s, background 0.2s, border-color 0.2s;
+            height: 36px;
+        }
+        .btn-logout:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.16); color: var(--text-primary); }
+        .btn-logout:active { transform: scale(0.98); opacity: 0.9; }
+        @media (max-width: 640px) {
+            .navbar { height: auto; }
+            .nav-inner { flex-direction: column; align-items: stretch; gap: 12px; padding: 12px 16px; }
+            .nav-menu { width: 100%; justify-content: space-between; }
+        }
+
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-radius: var(--radius-xl);
+            border: 1px solid transparent;
+            background-image:
+                linear-gradient(var(--bg-card), var(--bg-card)),
+                linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.85);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.015);
+        }
+        .panel-body { padding: 24px; }
+
+        .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+        .page-title {
+            font-size: 2rem;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #fff, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-subtitle { color: var(--text-secondary); margin: 8px 0 0 0; font-size: 1rem; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 24px; }
+        @media (max-width: 768px) { .page-header { flex-direction: column; align-items: stretch; } }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 650;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            height: 48px;
+            padding: 0 24px;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+            transition:
+                transform 0.2s var(--ease-apple),
+                opacity 0.2s,
+                background 0.2s,
+                border-color 0.2s,
+                box-shadow 0.2s;
+            user-select: none;
+        }
+        .btn:active { transform: scale(0.99); opacity: 0.94; }
+        .btn:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(255,255,255,0.08); }
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+            border-color: rgba(255,255,255,0.22);
+            box-shadow:
+                0 18px 40px rgba(255,255,255,0.10),
+                0 12px 26px rgba(0,0,0,0.35);
+        }
+        .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-secondary {
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.10);
+            box-shadow:
+                0 12px 26px rgba(0,0,0,0.28),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .btn-secondary:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.16); }
+
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+        @media (max-width: 1000px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th {
+            text-align: left;
+            padding: 14px 18px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-dim);
+            white-space: nowrap;
+        }
+        td {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .status-aktif {
+            background: rgba(255, 255, 255, 0.06); color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+        .status-selesai {
+            background: rgba(255, 255, 255, 0.05); color: var(--text-secondary);
+            border: 1px solid var(--border-dim);
+        }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .mono { font-family: "JetBrains Mono", monospace; color: var(--text-tertiary); }
+        .muted { color: var(--text-secondary); }
+        .card {
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            padding: 14px;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.02);
+            padding: 8px 12px;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50/50 text-slate-800">
 
-<header class="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-    <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-            </div>
-            <div>
-                <div class="text-sm font-bold text-slate-900 leading-tight">Buku Tamu Digital</div>
-                <div class="text-[11px] font-medium uppercase tracking-wider text-slate-500">Detail Record</div>
-            </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <a href="{{ route('bukutamu.kunjungan.index') }}" class="hidden sm:block text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Kembali</a>
-            <div class="h-6 w-[1px] bg-slate-200 hidden sm:block"></div>
-            <form method="post" action="{{ route('logout') }}" class="m-0">
-                @csrf
-                <button type="submit" class="text-sm font-semibold text-rose-600 hover:text-rose-700">Logout</button>
-            </form>
-        </div>
-    </div>
-</header>
+<body>
+    <div class="bg-fixed-layer bg-liquid"></div>
+    <div class="bg-smoke"></div>
+    <div class="bg-fixed-layer bg-grid"></div>
 
-<main class="mx-auto max-w-5xl px-4 py-8">
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Kunjungan #{{ $kunjungan->ID_KUNJUNGAN }}</h1>
-            <p class="text-sm text-slate-500 italic">Terdaftar pada sistem informasi buku tamu</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('bukutamu.kunjungan.edit', $kunjungan->ID_KUNJUNGAN) }}"
-               class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-               </svg>
-               Edit Data
-            </a>
-        </div>
-    </div>
-
-    @if (session('status'))
-        <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            {{ session('status') }}
-        </div>
-    @endif
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-hover hover:shadow-md">
-                <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-600">Informasi Utama</h2>
+    <header class="navbar">
+        <div class="nav-inner">
+            <div class="logo-group">
+                <div class="logo-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/></svg>
                 </div>
-                <div class="p-6">
-                    <div class="flex flex-col sm:flex-row justify-between gap-4 mb-8">
-                        <div>
-                            <span class="text-xs font-semibold uppercase text-slate-400">Nama Tamu</span>
-                            <h3 class="text-xl font-bold text-slate-900">{{ optional($kunjungan->tamu)->NAMA_TAMU ?? 'Tanpa Nama' }}</h3>
-                        </div>
-                        <div class="text-left sm:text-right">
-                            <span class="text-xs font-semibold uppercase text-slate-400 block mb-1">Status</span>
-                            @php($status = $kunjungan->STATUS_KUNJUNGAN ?? 'Pending')
-                            @php($isSelesai = strtolower($status) === 'selesai')
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider
-                                {{ $isSelesai ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300' : 'bg-amber-100 text-amber-700 ring-1 ring-amber-300' }}">
-                                <span class="h-1.5 w-1.5 rounded-full {{ $isSelesai ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                                {{ $status }}
-                            </span>
-                        </div>
+                <div>
+                    <div class="nav-title">Buku Tamu</div>
+                    <div class="nav-subtitle">Portal Admin</div>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="{{ route('bukutamu.kunjungan.index') }}" class="nav-link">Monitoring</a>
+                <form method="post" action="{{ route('logout') }}" style="margin:0">
+                    @csrf
+                    <button type="submit" class="btn-logout">Logout</button>
+                </form>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        @php($status = $kunjungan->STATUS_KUNJUNGAN ?? 'Pending')
+        @php($statusLower = strtolower((string) $status))
+        @php($isAktif = $statusLower === 'aktif')
+        @php($isSelesai = $statusLower === 'selesai')
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Kunjungan <span class="mono">#{{ $kunjungan->ID_KUNJUNGAN }}</span></h1>
+                <p class="page-subtitle">Detail record kunjungan tamu.</p>
+            </div>
+            <div style="display:flex; gap: 12px; justify-content:flex-end; flex-wrap: wrap;">
+                <a href="{{ route('bukutamu.kunjungan.edit', $kunjungan->ID_KUNJUNGAN) }}" class="btn btn-secondary">Edit Data</a>
+                <a href="{{ route('bukutamu.kunjungan.print', $kunjungan->ID_KUNJUNGAN) }}" class="btn btn-secondary" target="_blank" rel="noopener">Cetak Bukti</a>
+                @if (!$isSelesai)
+                    <form method="post" action="{{ route('bukutamu.kunjungan.end', $kunjungan->ID_KUNJUNGAN) }}" style="margin:0" onsubmit="return confirm('Akhiri kunjungan ini? Status akan menjadi Selesai.');">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" class="btn btn-primary">Akhiri Kunjungan</button>
+                    </form>
+                @endif
+                <a href="{{ route('bukutamu.kunjungan.index') }}" class="btn btn-secondary">Kembali</a>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div style="display:flex; flex-direction:column; gap: 16px;">
+                <section class="glass-panel">
+                    <div class="panel-header">
+                        <span class="label" style="margin:0">Informasi Utama</span>
+                        <span class="status-badge {{ $isAktif ? 'status-aktif' : 'status-selesai' }}">
+                            <span class="status-dot"></span>
+                            {{ $status }}
+                        </span>
                     </div>
-
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        <div class="group flex items-center gap-4 rounded-xl border border-slate-100 p-4 transition-colors hover:bg-slate-50">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 group-hover:bg-white transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                    <div class="panel-body">
+                        <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+                            <div class="card" style="grid-column: 1 / -1;">
+                                <span class="label" style="margin:0 0 6px 0">Nama Tamu</span>
+                                <div style="font-size: 1.15rem; font-weight: 800;">{{ optional($kunjungan->tamu)->NAMA_TAMU ?? 'Tanpa Nama' }}</div>
                             </div>
-                            <div>
-                                <div class="text-[11px] font-bold uppercase text-slate-400">Tanggal</div>
-                                <div class="text-sm font-semibold text-slate-900">{{ $kunjungan->TANGGAL_KUNJUNGAN }}</div>
+
+                            <div class="card">
+                                <span class="label" style="margin:0 0 6px 0">Instansi</span>
+                                <div style="font-weight: 650;">{{ optional($kunjungan->tamu)->INSTANSI ?? '-' }}</div>
+                            </div>
+                            <div class="card">
+                                <span class="label" style="margin:0 0 6px 0">Nomor HP</span>
+                                <div style="font-weight: 650;">{{ optional($kunjungan->tamu)->NO_HP ?? '-' }}</div>
+                            </div>
+                            <div class="card">
+                                <span class="label" style="margin:0 0 6px 0">Alamat Email</span>
+                                <div style="font-weight: 650; word-break: break-word;">{{ optional($kunjungan->tamu)->EMAIL ?? '-' }}</div>
+                            </div>
+                            <div class="card">
+                                <span class="label" style="margin:0 0 6px 0">Nomor KTP</span>
+                                <div style="font-weight: 650;">{{ optional($kunjungan->tamu)->NO_KTP ?? '-' }}</div>
                             </div>
                         </div>
 
-                        <div class="group flex items-center gap-4 rounded-xl border border-slate-100 p-4 transition-colors hover:bg-slate-50">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 group-hover:bg-white transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                        <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px;">
+                            <div class="card">
+                                <span class="label" style="margin:0 0 6px 0">Tanggal</span>
+                                <div style="font-weight: 700;">{{ $kunjungan->TANGGAL_KUNJUNGAN }}</div>
                             </div>
-                            <div>
-                                <div class="text-[11px] font-bold uppercase text-slate-400">Jam Masuk / Keluar</div>
-                                <div class="text-sm font-semibold text-slate-900">
-                                    {{ $kunjungan->JAM_MASUK ?? '--:--' }} <span class="mx-1 text-slate-300">→</span> {{ $kunjungan->JAM_KELUAR ?? '--:--' }}
+                            <div class="card">
+                                <span class="label" style="margin:0 0 6px 0">Jam Masuk / Keluar</span>
+                                <div style="font-weight: 700;">
+                                    {{ $kunjungan->JAM_MASUK ?? '--:--' }} <span class="muted">→</span> {{ $kunjungan->JAM_KELUAR ?? '--:--' }}
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mt-6">
-                        <div class="text-[11px] font-bold uppercase text-slate-400 mb-2">Catatan Tambahan</div>
-                        <div class="rounded-xl bg-slate-50 p-4 text-sm leading-relaxed text-slate-700 border border-slate-100 italic">
-                            {{ $kunjungan->CATATAN ?: 'Tidak ada catatan khusus untuk kunjungan ini.' }}
+                        <div style="margin-top: 12px;" class="card">
+                            <span class="label" style="margin:0 0 6px 0">Catatan Tambahan</span>
+                            <div class="muted" style="line-height: 1.6; font-style: italic;">{{ $kunjungan->CATATAN ?: 'Tidak ada catatan khusus untuk kunjungan ini.' }}</div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-600">Pegawai yang Ditemui</h2>
-                </div>
-                @if ($kunjungan->pegawai->isEmpty())
-                    <div class="p-8 text-center">
-                        <p class="text-sm text-slate-500 italic">Belum ada pegawai yang didata untuk kunjungan ini.</p>
+                <section class="glass-panel">
+                    <div class="panel-header">
+                        <span class="label" style="margin:0">Pegawai yang Ditemui</span>
                     </div>
-                @else
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50/50">
-                                    <th class="px-6 py-3 text-[11px] font-bold uppercase text-slate-500">NIK / Identitas</th>
-                                    <th class="px-6 py-3 text-[11px] font-bold uppercase text-slate-500">Nama Pegawai</th>
-                                    <th class="px-6 py-3 text-[11px] font-bold uppercase text-slate-500">Unit Kerja</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @foreach ($kunjungan->pegawai as $p)
-                                    <tr class="hover:bg-slate-50/80 transition-colors">
-                                        <td class="px-6 py-4 text-sm font-mono text-blue-600 font-medium">{{ $p->NIK }}</td>
-                                        <td class="px-6 py-4 text-sm font-bold text-slate-900">{{ $p->NAMA_PEGAWAI }}</td>
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                                                {{ optional($p->unit)->NAMA_UNIT ?? 'N/A' }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            </section>
-        </div>
-
-        <div class="space-y-6">
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Keperluan Kunjungan</h2>
-                @if ($kunjungan->keperluan->isEmpty())
-                    <p class="text-sm text-slate-400 italic">Tidak ada rincian keperluan.</p>
-                @else
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($kunjungan->keperluan as $kp)
-                            <div class="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 shadow-sm shadow-blue-50">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                                {{ $kp->NAMA_KEPERLUAN }}
+                    <div class="panel-body">
+                        @if ($kunjungan->pegawai->isEmpty())
+                            <div class="muted" style="font-style: italic;">Belum ada pegawai yang didata untuk kunjungan ini.</div>
+                        @else
+                            <div style="overflow-x:auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>NIK</th>
+                                            <th>Nama Pegawai</th>
+                                            <th>Unit Kerja</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($kunjungan->pegawai as $p)
+                                            <tr>
+                                                <td style="font-weight: 650;">{{ $p->NIK }}</td>
+                                                <td style="font-weight: 650;">{{ $p->NAMA_PEGAWAI }}</td>
+                                                <td><span class="pill">{{ optional($p->unit)->NAMA_UNIT ?? 'N/A' }}</span></td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
-                        @endforeach
+                        @endif
                     </div>
-                @endif
-            </section>
+                </section>
+            </div>
 
-            <div class="rounded-2xl border border-rose-100 bg-rose-50/30 p-6">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-rose-500 mb-3">Tindakan Berbahaya</h2>
-                <p class="text-xs text-rose-600/70 mb-4 leading-relaxed">Menghapus kunjungan ini akan menghilangkan seluruh riwayat data terkait secara permanen.</p>
-                
-                <form action="{{ route('bukutamu.kunjungan.destroy', $kunjungan->ID_KUNJUNGAN) }}" method="post" class="m-0">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            onclick="return confirm('Apakah Anda yakin ingin menghapus kunjungan ini?')"
-                            class="w-full rounded-xl bg-white border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95">
-                        Hapus Record
-                    </button>
-                </form>
+            <div style="display:flex; flex-direction:column; gap: 16px;">
+                <section class="glass-panel">
+                    <div class="panel-header">
+                        <span class="label" style="margin:0">Keperluan Kunjungan</span>
+                    </div>
+                    <div class="panel-body">
+                        @if ($kunjungan->keperluan->isEmpty())
+                            <div class="muted" style="font-style: italic;">Tidak ada rincian keperluan.</div>
+                        @else
+                            <div style="display:flex; flex-wrap: wrap; gap: 10px;">
+                                @foreach ($kunjungan->keperluan as $kp)
+                                    <span class="pill">{{ $kp->NAMA_KEPERLUAN }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </section>
+
+                <section class="glass-panel">
+                    <div class="panel-header">
+                        <span class="label" style="margin:0">Tindakan</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="muted" style="line-height: 1.6; margin-bottom: 12px;">
+                            Menghapus kunjungan akan menghilangkan data terkait secara permanen.
+                        </div>
+                        <form action="{{ route('bukutamu.kunjungan.destroy', $kunjungan->ID_KUNJUNGAN) }}" method="post" style="margin:0">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus kunjungan ini?')" class="btn btn-secondary" style="width:100%">
+                                Hapus Record
+                            </button>
+                        </form>
+                    </div>
+                </section>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
+    @include('partials.toast')
 </body>
 </html>

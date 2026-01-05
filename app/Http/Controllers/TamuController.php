@@ -36,7 +36,7 @@ class TamuController extends Controller
             'NAMA_TAMU' => ['required', 'string', 'max:50'],
             'INSTANSI' => ['required', 'string', 'max:60'],
             'NO_HP' => ['required', 'string', 'max:15'],
-            'EMAIL' => ['required', 'string', 'max:15'],
+                'EMAIL' => ['required', 'string', 'max:100'],
             'NO_KTP' => ['required', 'string', 'max:16'],
         ]);
 
@@ -55,7 +55,7 @@ class TamuController extends Controller
             'NAMA_TAMU' => ['required', 'string', 'max:50'],
             'INSTANSI' => ['required', 'string', 'max:60'],
             'NO_HP' => ['required', 'string', 'max:15'],
-            'EMAIL' => ['required', 'string', 'max:15'],
+                'EMAIL' => ['required', 'string', 'max:100'],
             'NO_KTP' => ['required', 'string', 'max:16'],
         ]);
 

@@ -46,13 +46,13 @@ class StoreKunjunganRequest extends FormRequest
             'NO_HP' => [
                 'nullable',
                 'string',
-                'max:15',
+                'max:100',
                 Rule::requiredIf(fn () => $this->input('TAMU_MODE') === 'new'),
             ],
             'EMAIL' => [
                 'nullable',
                 'email',
-                'max:15',
+                'max:100',
                 Rule::requiredIf(fn () => $this->input('TAMU_MODE') === 'new'),
             ],
             'NO_KTP' => [

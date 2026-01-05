@@ -17,12 +17,26 @@ Route::get('/', function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+    // Basic rate limit untuk mencegah brute-force (5 request/menit per IP).
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login.store');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::prefix('bukutamu')->as('bukutamu.')->middleware('auth')->group(function () {
+    // Aksi khusus: akhiri kunjungan (status -> Selesai)
+    Route::put('kunjungan/{ID_KUNJUNGAN}/end', [KunjunganController::class, 'end'])->name('kunjungan.end');
+
+    // Cetak bukti kunjungan (halaman siap print)
+    Route::get('kunjungan/{ID_KUNJUNGAN}/print', [KunjunganController::class, 'print'])->name('kunjungan.print');
+
+    // Export (harus didefinisikan sebelum resource agar tidak ketangkap sebagai {ID_KUNJUNGAN})
+    Route::get('kunjungan/export/csv', [KunjunganController::class, 'exportCsv'])->name('kunjungan.export.csv');
+    Route::get('kunjungan/export/pdf', [KunjunganController::class, 'exportPdf'])->name('kunjungan.export.pdf');
+
+    // Async data untuk dashboard
+    Route::get('kunjungan/per-unit', [KunjunganController::class, 'perUnit'])->name('kunjungan.perUnit');
+
     // Resource (CRUD) untuk Kunjungan
     Route::resource('kunjungan', KunjunganController::class)->names('kunjungan');
 

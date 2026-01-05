@@ -4,225 +4,577 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tambah Kunjungan - Buku Tamu Digital</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        
-        .custom-checkbox:checked {
-            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-            background-color: #2563eb;
-            border-color: #2563eb;
+        :root {
+            --bg-void: #050505;
+            --bg-card: rgba(10, 10, 10, 0.7);
+            --bg-input: #0a0a0a;
+
+            --border-dim: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(255, 255, 255, 0.2);
+
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-tertiary: #52525b;
+
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+
+            --ease-apple: cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        #tamu-existing, #tamu-new {
-            transition: all 0.3s ease;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: var(--bg-void);
+            color: var(--text-primary);
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            font-size: 14px;
         }
+        a { text-decoration: none; color: inherit; transition: all 0.2s ease; }
+        * { box-sizing: border-box; outline: none; }
+
+        .bg-fixed-layer { position: fixed; inset: 0; pointer-events: none; }
+        .bg-liquid {
+            z-index: -3;
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(at 0% 0%, hsla(0,0%,15%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(0,0%,5%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(0,0%,15%,1) 0, transparent 50%);
+            background-size: 200% 200%;
+            animation: liquidFlow 15s ease infinite alternate;
+            opacity: 0.6;
+        }
+        @keyframes liquidFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .bg-smoke {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw; height: 150vh;
+            z-index: -2;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+            filter: blur(80px);
+            animation: breathe 10s infinite ease-in-out;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+        .bg-grid {
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            opacity: 0.4;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px 100px 24px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 0 16px 80px 16px; }
+            .nav-inner { padding: 0 16px; }
+        }
+
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10, 10, 10, 0.35);
+            backdrop-filter: blur(34px) saturate(160%);
+            -webkit-backdrop-filter: blur(34px) saturate(160%);
+            border-bottom: 1px solid var(--border-dim);
+            height: 72px;
+            display: flex; align-items: center;
+            margin-bottom: 32px;
+            isolation: isolate;
+        }
+        .navbar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255,255,255,0.06), transparent 45%),
+                radial-gradient(circle at 80% 0%, rgba(255,255,255,0.04), transparent 50%);
+            opacity: 0.9;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .navbar::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 1px;
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0.16),
+                rgba(255,255,255,0)
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+        .nav-inner {
+            display: flex; justify-content: space-between; align-items: center; width: 100%;
+            padding: 0 24px; max-width: 1000px; margin: 0 auto;
+        }
+        .logo-group { display: flex; align-items: center; gap: 14px; }
+        .logo-box {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, #1f1f22, #070708);
+            border: 1px solid var(--border-dim);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: grid; place-items: center;
+        }
+        .nav-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; line-height: 1.1; }
+        .nav-subtitle { font-size: 0.75rem; color: var(--text-tertiary); font-weight: 500; line-height: 1.1; margin-top: 2px; }
+        .nav-menu { display: flex; align-items: center; gap: 14px; }
+        .nav-link {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+        }
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 8px 14px;
+            border-radius: 10px;
+            transition: transform 0.2s var(--ease-apple), opacity 0.2s, background 0.2s, border-color 0.2s;
+            height: 36px;
+        }
+        .btn-logout:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.16); color: var(--text-primary); }
+        .btn-logout:active { transform: scale(0.98); opacity: 0.9; }
+
+        @media (max-width: 640px) {
+            .navbar { height: auto; }
+            .nav-inner { flex-direction: column; align-items: stretch; gap: 12px; padding: 12px 16px; }
+            .nav-menu { width: 100%; justify-content: space-between; }
+        }
+
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-radius: var(--radius-xl);
+            border: 1px solid transparent;
+            background-image:
+                linear-gradient(var(--bg-card), var(--bg-card)),
+                linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.85);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.015);
+        }
+        .panel-body { padding: 24px; }
+
+        .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+        .page-title {
+            font-size: 2rem;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #fff, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-subtitle { color: var(--text-secondary); margin: 8px 0 0 0; font-size: 1rem; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 24px; }
+        @media (max-width: 768px) {
+            .page-header { flex-direction: column; align-items: stretch; }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 650;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            height: 48px;
+            padding: 0 24px;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+            position: relative;
+            z-index: 1;
+            transition:
+                transform 0.2s var(--ease-apple),
+                opacity 0.2s,
+                background 0.2s,
+                border-color 0.2s,
+                box-shadow 0.2s;
+            user-select: none;
+        }
+        .btn:active { transform: scale(0.99); opacity: 0.94; }
+        .btn:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(255,255,255,0.08); }
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+            border-color: rgba(255,255,255,0.22);
+            box-shadow:
+                0 22px 60px rgba(255,255,255,0.14),
+                0 14px 30px rgba(0,0,0,0.55);
+        }
+        .btn-primary:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.10);
+            box-shadow:
+                0 12px 26px rgba(0,0,0,0.28),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .btn-secondary:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.16); }
+        .btn-sm { height: 34px; padding: 0 14px; font-size: 0.8rem; border-radius: 999px; }
+
+        .ios-input {
+            height: 48px;
+            width: 100%;
+            padding: 0 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-dim);
+            background-color: var(--bg-input) !important;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s var(--ease-apple);
+        }
+        textarea.ios-input { height: auto; padding: 12px 16px; }
+        .ios-input:focus {
+            outline: none;
+            background-color: #000 !important;
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+        }
+        input[type="date"].ios-input::-webkit-calendar-picker-indicator {
+            filter: invert(1) brightness(1.2);
+            opacity: 0.9;
+            cursor: pointer;
+        }
+        input[type="time"].ios-input::-webkit-calendar-picker-indicator {
+            filter: invert(1) brightness(1.2);
+            opacity: 0.9;
+            cursor: pointer;
+        }
+        select.ios-input {
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
+        .field { display: flex; flex-direction: column; }
+
+        .segmented {
+            display: inline-flex;
+            gap: 6px;
+            padding: 6px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.02);
+        }
+        .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+        .segmented label {
+            position: relative;
+            padding: 7px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            user-select: none;
+        }
+        .segmented label:has(input:checked) {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.12);
+        }
+
+        #tamu-existing, #tamu-new { transition: all 0.25s var(--ease-apple); }
+        .hidden { display: none !important; }
+
+        .choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        @media (max-width: 900px) { .choice-grid { grid-template-columns: 1fr; } }
+        .choice-card {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            transition: transform 0.2s var(--ease-apple), border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+        .choice-card:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.03); }
+        .custom-checkbox { width: 18px; height: 18px; margin-top: 2px; accent-color: #ffffff; }
+        .mono { font-family: "JetBrains Mono", monospace; color: var(--text-tertiary); }
+        .muted { color: var(--text-secondary); }
+
+        .alert {
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.02);
+            padding: 14px 16px;
+            color: var(--text-secondary);
+        }
+        .alert strong { color: var(--text-primary); }
+        .alert ul { margin: 10px 0 0 18px; }
     </style>
 </head>
-<body class="min-h-screen bg-[#f8fafc] text-slate-800">
 
-<header class="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-    <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md shadow-blue-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+<body>
+    <div class="bg-fixed-layer bg-liquid"></div>
+    <div class="bg-smoke"></div>
+    <div class="bg-fixed-layer bg-grid"></div>
+
+    <header class="navbar">
+        <div class="nav-inner">
+            <div class="logo-group">
+                <div class="logo-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/></svg>
+                </div>
+                <div>
+                    <div class="nav-title">Buku Tamu</div>
+                    <div class="nav-subtitle">Portal Admin</div>
+                </div>
             </div>
+            <nav class="nav-menu">
+                <a href="{{ route('bukutamu.kunjungan.index') }}" class="nav-link">Monitoring</a>
+                <form method="post" action="{{ route('logout') }}" style="margin:0">
+                    @csrf
+                    <button type="submit" class="btn-logout">Logout</button>
+                </form>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
             <div>
-                <div class="text-sm font-bold text-slate-900 leading-none">Buku Tamu Digital</div>
-                <div class="text-[11px] font-medium uppercase tracking-widest text-slate-500 mt-1">Registrasi Kunjungan</div>
+                <h1 class="page-title">Tambah Kunjungan</h1>
+                <p class="page-subtitle">Lengkapi data tamu, keperluan, dan pegawai yang ditemui.</p>
             </div>
+            <a href="{{ route('bukutamu.kunjungan.index') }}" class="btn btn-secondary" style="height:48px">Batal</a>
         </div>
-        <div class="flex items-center gap-4">
-            <a href="{{ route('bukutamu.kunjungan.index') }}" class="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors">Batal</a>
-            <div class="h-5 w-px bg-slate-200"></div>
-            <form method="post" action="{{ route('logout') }}" class="m-0">
-                @csrf
-                <button type="submit" class="text-sm font-bold text-rose-500 hover:text-rose-600 transition-colors">Logout</button>
-            </form>
-        </div>
-    </div>
-</header>
 
-<main class="mx-auto max-w-4xl px-4 py-8">
-    
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Tambah Kunjungan Baru</h1>
-        <p class="text-sm text-slate-500 mt-1 italic">Silakan lengkapi data tamu dan keperluan kunjungan di bawah ini.</p>
-    </div>
-
-    @if ($errors->any())
-        <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 shadow-sm">
-            <div class="flex items-center gap-2 font-bold mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                Validasi Gagal:
+        @if ($errors->any())
+            <div class="alert" style="margin-bottom: 16px;">
+                <strong>Validasi gagal:</strong>
+                <ul>
+                    @foreach ($errors->all() as $msg)
+                        <li>{{ $msg }}</li>
+                    @endforeach
+                </ul>
             </div>
-            <ul class="list-disc pl-5 space-y-1 font-medium italic text-xs">
-                @foreach ($errors->all() as $msg)
-                    <li>{{ $msg }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        @endif
 
-    <form action="{{ route('bukutamu.kunjungan.store') }}" method="post" class="space-y-6">
-        @csrf
+        <form action="{{ route('bukutamu.kunjungan.store') }}" method="post" style="display:flex; flex-direction:column; gap: 16px;">
+            @csrf
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <span class="h-2 w-2 rounded-full bg-blue-600"></span>
-                    Data Tamu
-                </h2>
-                <div class="flex p-1 bg-slate-100 rounded-xl">
-                    <label class="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm">
-                        <input type="radio" name="TAMU_MODE" value="existing" class="hidden" 
-                               {{ old('TAMU_MODE', 'existing') === 'existing' ? 'checked' : '' }} onchange="toggleTamuMode()">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Existing</span>
-                    </label>
-                    <label class="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm">
-                        <input type="radio" name="TAMU_MODE" value="new" class="hidden"
-                               {{ old('TAMU_MODE') === 'new' ? 'checked' : '' }} onchange="toggleTamuMode()">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Baru</span>
-                    </label>
-                </div>
-            </div>
-
-            <div id="tamu-existing" class="space-y-2">
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Cari Tamu Terdaftar</label>
-                <div class="relative group">
-                    <select name="ID_TAMU" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none cursor-pointer">
-                        <option value="">-- Pilih Tamu --</option>
-                        @foreach ($tamus as $t)
-                            <option value="{{ $t->ID_TAMU }}" @selected(old('ID_TAMU') === $t->ID_TAMU)>
-                                {{ $t->ID_TAMU }} - {{ $t->NAMA_TAMU }} ({{ $t->INSTANSI }})
-                            </option>
-                        @endforeach
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-                        <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+            <section class="glass-panel">
+                <div class="panel-header">
+                    <span class="label" style="margin:0">Data Tamu</span>
+                    <div class="segmented" role="tablist" aria-label="Mode input tamu">
+                        <label>
+                            <input type="radio" name="TAMU_MODE" value="existing" {{ old('TAMU_MODE', 'existing') === 'existing' ? 'checked' : '' }} onchange="toggleTamuMode()">
+                            Existing
+                        </label>
+                        <label>
+                            <input type="radio" name="TAMU_MODE" value="new" {{ old('TAMU_MODE') === 'new' ? 'checked' : '' }} onchange="toggleTamuMode()">
+                            Baru
+                        </label>
                     </div>
                 </div>
-            </div>
+                <div class="panel-body">
+                    <div id="tamu-existing" style="display:flex; flex-direction:column; gap: 10px;">
+                        <div class="field">
+                            <label class="label">Cari Tamu Terdaftar</label>
+                            <select name="ID_TAMU" class="ios-input">
+                                <option value="">-- Pilih Tamu --</option>
+                                @foreach ($tamus as $t)
+                                    <option value="{{ $t->ID_TAMU }}" @selected(old('ID_TAMU') === $t->ID_TAMU)>
+                                        {{ $t->ID_TAMU }} - {{ $t->NAMA_TAMU }} ({{ $t->INSTANSI }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
 
-            <div id="tamu-new" class="hidden">
-                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <div class="space-y-1.5">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Nama Lengkap</label>
-                        <input type="text" name="NAMA_TAMU" value="{{ old('NAMA_TAMU') }}" placeholder="Contoh: Budi Santoso" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Instansi / Perusahaan</label>
-                        <input type="text" name="INSTANSI" value="{{ old('INSTANSI') }}" placeholder="Contoh: PT. Maju Jaya" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">No. HP / WhatsApp</label>
-                        <input type="text" name="NO_HP" value="{{ old('NO_HP') }}" placeholder="08..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Alamat Email</label>
-                        <input type="email" name="EMAIL" value="{{ old('EMAIL') }}" placeholder="budi@example.com" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                    </div>
-                    <div class="sm:col-span-2 space-y-1.5">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Nomor KTP (NIK)</label>
-                        <input type="text" name="NO_KTP" value="{{ old('NO_KTP') }}" placeholder="16 digit nomor induk kependudukan" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-sm font-bold text-slate-900 mb-5 flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                Waktu Kunjungan
-            </h2>
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div class="space-y-1.5">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Tanggal Kunjungan</label>
-                    <input type="date" name="TANGGAL_KUNJUNGAN" value="{{ old('TANGGAL_KUNJUNGAN', date('Y-m-d')) }}" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                </div>
-                <div class="space-y-1.5">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Jam Masuk</label>
-                    <input type="time" name="JAM_MASUK" value="{{ old('JAM_MASUK') }}" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                </div>
-                <div class="sm:col-span-2 space-y-1.5">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Catatan</label>
-                    <textarea name="CATATAN" rows="3" placeholder="Tuliskan keterangan tambahan..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">{{ old('CATATAN') }}</textarea>
-                </div>
-            </div>
-        </section>
-
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-sm font-bold text-slate-900 mb-5 flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-purple-500"></span>
-                Rincian Keperluan
-            </h2>
-            @php($oldKeperluan = old('ID_KEPERLUAN', []))
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @foreach ($keperluans as $kp)
-                    <label class="flex items-start gap-3 p-4 rounded-2xl border border-slate-100 bg-slate-50/50 cursor-pointer hover:bg-white hover:border-blue-200 hover:shadow-md transition-all group">
-                        <input type="checkbox" name="ID_KEPERLUAN[]" value="{{ $kp->ID_KEPERLUAN }}" class="custom-checkbox mt-1 h-5 w-5 appearance-none rounded-md border border-slate-300 transition-all checked:border-blue-600 focus:ring-2 focus:ring-blue-500/20" @checked(in_array($kp->ID_KEPERLUAN, $oldKeperluan, true))>
-                        <div class="flex flex-col">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold text-slate-700 group-hover:text-blue-600">{{ $kp->NAMA_KEPERLUAN }}</span>
-                                <span class="text-[10px] font-bold text-slate-400 bg-slate-200 px-1.5 py-0.5 rounded leading-none uppercase">{{ $kp->ID_KEPERLUAN }}</span>
+                    <div id="tamu-new" class="hidden">
+                        <div class="form-grid">
+                            <div class="field">
+                                <label class="label">Nama Lengkap</label>
+                                <input type="text" name="NAMA_TAMU" value="{{ old('NAMA_TAMU') }}" class="ios-input" placeholder="Contoh: Budi Santoso" />
                             </div>
-                            @if($kp->KETERANGAN)
-                                <p class="mt-1 text-xs text-slate-500 leading-relaxed italic">"{{ $kp->KETERANGAN }}"</p>
-                            @endif
+                            <div class="field">
+                                <label class="label">Instansi / Perusahaan</label>
+                                <input type="text" name="INSTANSI" value="{{ old('INSTANSI') }}" class="ios-input" placeholder="Contoh: PT. Maju Jaya" />
+                            </div>
+                            <div class="field">
+                                <label class="label">No. HP / WhatsApp</label>
+                                <input type="text" name="NO_HP" value="{{ old('NO_HP') }}" class="ios-input" placeholder="08..." />
+                            </div>
+                            <div class="field">
+                                <label class="label">Alamat Email</label>
+                                <input type="email" name="EMAIL" value="{{ old('EMAIL') }}" class="ios-input" placeholder="budi@example.com" />
+                            </div>
+                            <div class="field" style="grid-column: 1 / -1;">
+                                <label class="label">Nomor KTP (NIK)</label>
+                                <input type="text" name="NO_KTP" value="{{ old('NO_KTP') }}" class="ios-input" placeholder="16 digit nomor induk kependudukan" />
+                            </div>
                         </div>
-                    </label>
-                @endforeach
-            </div>
-        </section>
+                    </div>
+                </div>
+            </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-sm font-bold text-slate-900 mb-5 flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-                Pegawai yang Ditemui
-            </h2>
-            @php($oldNik = old('NIK', []))
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @foreach ($pegawais as $p)
-                    <label class="flex items-start gap-3 p-4 rounded-2xl border border-slate-100 bg-slate-50/50 cursor-pointer hover:bg-white hover:border-blue-200 hover:shadow-md transition-all group">
-                        <input type="checkbox" name="NIK[]" value="{{ $p->NIK }}" class="custom-checkbox mt-1 h-5 w-5 appearance-none rounded-md border border-slate-300 transition-all checked:border-blue-600 focus:ring-2 focus:ring-blue-500/20" @checked(in_array($p->NIK, $oldNik, true))>
-                        <div class="flex flex-col">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-blue-600">{{ $p->NAMA_PEGAWAI }}</span>
-                            <span class="text-[11px] font-medium text-slate-400">NIK: {{ $p->NIK }} • Unit: {{ optional($p->unit)->NAMA_UNIT ?? '-' }}</span>
+            <section class="glass-panel">
+                <div class="panel-header">
+                    <span class="label" style="margin:0">Waktu Kunjungan</span>
+                </div>
+                <div class="panel-body">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label class="label">Tanggal Kunjungan</label>
+                            <input type="date" name="TANGGAL_KUNJUNGAN" value="{{ old('TANGGAL_KUNJUNGAN', date('Y-m-d')) }}" class="ios-input" />
                         </div>
-                    </label>
-                @endforeach
+                        <div class="field">
+                            <label class="label">Jam Masuk</label>
+                            <input type="time" name="JAM_MASUK" value="{{ old('JAM_MASUK') }}" class="ios-input" />
+                        </div>
+                        <div class="field" style="grid-column: 1 / -1;">
+                            <label class="label">Catatan</label>
+                            <textarea name="CATATAN" rows="3" class="ios-input" placeholder="Tuliskan keterangan tambahan...">{{ old('CATATAN') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="glass-panel">
+                <div class="panel-header">
+                    <span class="label" style="margin:0">Rincian Keperluan</span>
+                </div>
+                <div class="panel-body">
+                    @php($oldKeperluan = old('ID_KEPERLUAN', []))
+                    <div class="choice-grid">
+                        @foreach ($keperluans as $kp)
+                            <label class="choice-card">
+                                <input type="checkbox" name="ID_KEPERLUAN[]" value="{{ $kp->ID_KEPERLUAN }}" class="custom-checkbox" @checked(in_array($kp->ID_KEPERLUAN, $oldKeperluan, true))>
+                                <div style="min-width:0; display:flex; flex-direction:column; gap: 4px;">
+                                    <div style="display:flex; align-items:center; gap: 10px; min-width:0;">
+                                        <span style="font-weight:700; color: var(--text-primary); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $kp->NAMA_KEPERLUAN }}</span>
+                                        <span class="mono">{{ $kp->ID_KEPERLUAN }}</span>
+                                    </div>
+                                    @if($kp->KETERANGAN)
+                                        <span class="muted" style="font-style: italic; line-height: 1.5;">"{{ $kp->KETERANGAN }}"</span>
+                                    @endif
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+
+            <section class="glass-panel">
+                <div class="panel-header">
+                    <span class="label" style="margin:0">Pegawai yang Ditemui</span>
+                </div>
+                <div class="panel-body">
+                    @php($oldNik = old('NIK', []))
+                    <div class="choice-grid">
+                        @foreach ($pegawais as $p)
+                            <label class="choice-card">
+                                <input type="checkbox" name="NIK[]" value="{{ $p->NIK }}" class="custom-checkbox" @checked(in_array($p->NIK, $oldNik, true))>
+                                <div style="min-width:0; display:flex; flex-direction:column; gap: 6px;">
+                                    <span style="font-weight:700; color: var(--text-primary);">{{ $p->NAMA_PEGAWAI }}</span>
+                                    <span class="muted" style="font-size: 0.9rem;">NIK: <span class="mono">{{ $p->NIK }}</span> • Unit: {{ optional($p->unit)->NAMA_UNIT ?? '-' }}</span>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+
+            <div style="display:flex; gap: 12px; justify-content:flex-end; margin-top: 8px;">
+                <a href="{{ route('bukutamu.kunjungan.index') }}" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan Kunjungan</button>
             </div>
-        </section>
+        </form>
+    </main>
 
-        <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-200">
-            <a href="{{ route('bukutamu.kunjungan.index') }}" class="rounded-xl border border-slate-200 bg-white px-8 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all active:scale-95">Batal</a>
-            <button type="submit" class="rounded-xl bg-blue-600 px-10 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">Simpan Kunjungan</button>
-        </div>
-    </form>
-</main>
+    <script>
+        function toggleTamuMode() {
+            const mode = document.querySelector('input[name="TAMU_MODE"]:checked')?.value || 'existing';
+            const existing = document.getElementById('tamu-existing');
+            const newBox = document.getElementById('tamu-new');
+            if (!existing || !newBox) return;
 
-<script>
-    function toggleTamuMode() {
-        const mode = document.querySelector('input[name="TAMU_MODE"]:checked')?.value || 'existing';
-        const existing = document.getElementById('tamu-existing');
-        const newBox = document.getElementById('tamu-new');
-        if (mode === 'new') {
-            existing.classList.add('hidden');
-            newBox.classList.remove('hidden');
-        } else {
-            newBox.classList.add('hidden');
-            existing.classList.remove('hidden');
+            if (mode === 'new') {
+                existing.classList.add('hidden');
+                newBox.classList.remove('hidden');
+            } else {
+                newBox.classList.add('hidden');
+                existing.classList.remove('hidden');
+            }
         }
-    }
-    document.addEventListener('DOMContentLoaded', toggleTamuMode);
-</script>
+        document.addEventListener('DOMContentLoaded', toggleTamuMode);
+    </script>
 
+    @include('partials.toast')
 </body>
 </html>

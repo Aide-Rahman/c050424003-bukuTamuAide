@@ -43,50 +43,58 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <div class="header-card">
-            <div class="header-top">
-                <h2 style="margin: 0;">Buku Tamu</h2>
-                <nav>
-            @auth
-                <a href="{{ route('bukutamu.kunjungan.index') }}">Kunjungan</a>
-                <a href="{{ route('bukutamu.tamu.index') }}">Tamu (JSON)</a>
-                <a href="{{ route('bukutamu.pegawai.index') }}">Pegawai (JSON)</a>
-                <a href="{{ route('bukutamu.unit.index') }}">Unit (JSON)</a>
+@php
+    $isLoginPage = request()->routeIs('login');
+@endphp
 
-                <form method="post" action="{{ route('logout') }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn">Logout</button>
-                </form>
-            @endauth
+@if ($isLoginPage)
+    @yield('content')
+@else
+    <div class="container">
+        <header>
+            <div class="header-card">
+                <div class="header-top">
+                    <h2 style="margin: 0;">Buku Tamu</h2>
+                    <nav>
+                @auth
+                    <a href="{{ route('bukutamu.kunjungan.index') }}">Kunjungan</a>
+                    <a href="{{ route('bukutamu.tamu.index') }}">Tamu (JSON)</a>
+                    <a href="{{ route('bukutamu.pegawai.index') }}">Pegawai (JSON)</a>
+                    <a href="{{ route('bukutamu.unit.index') }}">Unit (JSON)</a>
 
-            @guest
-                <a href="{{ route('login') }}">Login</a>
-            @endguest
-                </nav>
+                    <form method="post" action="{{ route('logout') }}" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="btn">Logout</button>
+                    </form>
+                @endauth
+
+                @guest
+                    <a href="{{ route('login') }}">Login</a>
+                @endguest
+                    </nav>
+                </div>
+
+            @if (session('status'))
+                <div class="alert">{{ session('status') }}</div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert" style="border-color:#f5c2c7;background:#fff0f1;">
+                    <strong>Validasi gagal:</strong>
+                    <ul style="margin:8px 0 0 18px;">
+                        @foreach ($errors->all() as $msg)
+                            <li>{{ $msg }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             </div>
+        </header>
 
-        @if (session('status'))
-            <div class="alert">{{ session('status') }}</div>
-        @endif
-
-        @if ($errors->any())
-            <div class="alert" style="border-color:#f5c2c7;background:#fff0f1;">
-                <strong>Validasi gagal:</strong>
-                <ul style="margin:8px 0 0 18px;">
-                    @foreach ($errors->all() as $msg)
-                        <li>{{ $msg }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        </div>
-    </header>
-
-    <main>
-        @yield('content')
-    </main>
-</div>
+        <main>
+            @yield('content')
+        </main>
+    </div>
+@endif
 </body>
 </html>
